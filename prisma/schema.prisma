@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Payment {
+  id                     String    @id @default(uuid())
+  uuid                   String    @unique
+  number                 String?
+  registration_date      DateTime?
+  payment_date           DateTime?
+  cut_off_date           DateTime? @db.Date
+  type                   String?
+  category               String?
+  amount                 Float
+  partial_amount         Float?
+  tip                    Float?
+  tax                    Float?
+  currency               String    @default("USD")
+  fee_amount             Float?
+  fee_currency           String?
+  description            String?
+  bill_description       String?
+  status                 PaymentStatus @default(PENDING)
+  metadata               Json?
+  debitor_alias          String?
+  debitor_complete_name  String?
+  debitor_alias_type     String?
+  debitor_bank_name      String?
+  creditor_alias         String?
+  creditor_complete_name String?
+  creditor_alias_type    String?
+  creditor_bank_name     String?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+  qr_code_data           String?
+
+  @@map("payments")
+  @@index([status])
+  @@index([created_at])
+  @@index([uuid])
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  EXPIRED
+  REVERSED
+}
+
+model YappySession {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  code       String
+  state      String   @default("OPEN")
+  open_at    DateTime
+  closed_at  DateTime?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("yappy_sessions")
+  @@index([token])
+  @@index([state])
+  @@index([code])
+}
